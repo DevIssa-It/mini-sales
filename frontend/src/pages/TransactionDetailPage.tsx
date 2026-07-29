@@ -2,7 +2,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from '@phosphor-icons/react';
 import { getTransaction } from '../lib/api';
-import { formatCurrency } from '../lib/utils';
 import { Skeleton } from '../components/ui/Skeleton';
 import { TransactionReceipt } from '../components/transactions/TransactionReceipt';
 import type { Transaction } from '../types';
