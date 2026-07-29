@@ -3,6 +3,8 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { randomUUID } from 'crypto';
 
+import { Pool } from 'pg';
+
 const initialProducts: Prisma.ProductCreateInput[] = [
   { name: 'Kopi Americano', price: 25000, stock: 50, isActive: true, category: 'Minuman', imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=120&auto=format&fit=crop&q=80' },
   { name: 'Kopi Latte', price: 32000, stock: 40, isActive: true, category: 'Minuman', imageUrl: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=120&auto=format&fit=crop&q=80' },
@@ -40,10 +42,12 @@ export class PrismaService
       !isLocalhost &&
       (connectionString.includes('.rlwy.net') || process.env.DATABASE_SSL === 'true');
 
-    const adapter = new PrismaPg({
+    const pool = new Pool({
       connectionString,
-      ssl: needsSsl ? { rejectUnauthorized: false } : false,
+      ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
     });
+
+    const adapter = new PrismaPg(pool);
 
     super({ adapter });
   }
