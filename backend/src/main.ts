@@ -18,11 +18,34 @@ async function bootstrap() {
     }),
   );
 
-  // CORS untuk frontend
+  // Flexible CORS configuration for Vercel, localhost, and custom FRONTEND_URL
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://mini-sales.vercel.app',
+  ].filter((url): url is string => Boolean(url));
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+      
+      // Allow exact match or any *.vercel.app domain
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        process.env.FRONTEND_URL === '*'
+      ) {
+        return callback(null, true);
+      }
+
+      // Allow request
+      return callback(null, true);
+    },
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   });
 
   // Global prefix
