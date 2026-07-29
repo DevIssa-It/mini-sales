@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { randomUUID } from 'crypto';
 
 const initialProducts: Prisma.ProductCreateInput[] = [
   { name: 'Kopi Americano', price: 25000, stock: 50, isActive: true, category: 'Minuman', imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=120&auto=format&fit=crop&q=80' },
@@ -52,27 +53,60 @@ export class PrismaService
       await this.$connect();
       this.logger.log('✅ Successfully connected to PostgreSQL database via Prisma');
 
-      // Auto-seed initial products in background if database is empty
-      this.autoSeedIfEmpty().catch((err) => {
-        this.logger.warn('Auto-seed check warning:', err?.message || err);
+      // Auto-create DDL tables & seed initial products in background if database is empty
+      this.autoInitAndSeed().catch((err) => {
+        this.logger.warn('Auto-init database warning:', err?.message || err);
       });
     } catch (error) {
       this.logger.error('❌ Failed to connect to database during startup:', error);
     }
   }
 
-  private async autoSeedIfEmpty() {
+  private async autoInitAndSeed() {
     try {
+      await this.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "Product" (
+          "id" TEXT NOT NULL PRIMARY KEY,
+          "name" TEXT NOT NULL,
+          "price" DECIMAL(12,2) NOT NULL,
+          "stock" INTEGER NOT NULL DEFAULT 0,
+          "isActive" BOOLEAN NOT NULL DEFAULT true,
+          "imageUrl" TEXT,
+          "category" TEXT NOT NULL DEFAULT 'Lainnya',
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS "Transaction" (
+          "id" TEXT NOT NULL PRIMARY KEY,
+          "total" DECIMAL(12,2) NOT NULL,
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS "TransactionItem" (
+          "id" TEXT NOT NULL PRIMARY KEY,
+          "transactionId" TEXT NOT NULL,
+          "productId" TEXT NOT NULL,
+          "productName" TEXT NOT NULL,
+          "priceAtTime" DECIMAL(12,2) NOT NULL,
+          "quantity" INTEGER NOT NULL,
+          "subtotal" DECIMAL(12,2) NOT NULL
+        );
+      `);
+
       const count = await this.product.count();
       if (count === 0) {
         this.logger.log('🌱 Database is empty. Seeding initial products...');
         for (const p of initialProducts) {
-          await this.product.create({ data: p });
+          await this.product.create({
+            data: {
+              ...p,
+              id: randomUUID(),
+            },
+          });
         }
         this.logger.log(`✅ Seeded ${initialProducts.length} initial products successfully!`);
       }
     } catch (err) {
-      // Table might not exist yet or connection pending
+      this.logger.warn('Auto-init database warning:', err?.message || err);
     }
   }
 
