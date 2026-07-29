@@ -18,33 +18,11 @@ async function bootstrap() {
     }),
   );
 
-  // CORS configuration reading FRONTEND_URL dynamically with safe defaults
-  const extraOrigin = process.env.FRONTEND_URL;
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    ...(extraOrigin ? [extraOrigin] : []),
-  ];
-
+  // Global CORS setup (Sama seperti Express app.use(cors({ origin: '*' })))
   app.enableCors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, Postman, curl, server-to-server)
-      if (!origin) return callback(null, true);
-
-      // Allow if origin is explicitly in allowed list or is any *.vercel.app domain
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.endsWith('.vercel.app') ||
-        process.env.FRONTEND_URL === '*'
-      ) {
-        return callback(null, true);
-      }
-
-      return callback(null, true);
-    },
-    credentials: true,
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Global prefix
