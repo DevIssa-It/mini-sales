@@ -1,6 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
 
 const connectionString =
   process.env.DATABASE_URL ||
@@ -17,11 +16,10 @@ const needsSsl =
   !isLocalhost &&
   (connectionString.includes('.rlwy.net') || process.env.DATABASE_SSL === 'true');
 
-const pool = new Pool({
+const adapter = new PrismaPg({
   connectionString,
   ssl: needsSsl ? { rejectUnauthorized: false } : false,
 });
-const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 const products: (Prisma.ProductCreateInput & { imageUrl?: string; category?: string })[] = [
@@ -59,5 +57,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-    await pool.end();
   });

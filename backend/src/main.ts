@@ -22,9 +22,13 @@ async function bootstrap() {
     }),
   );
 
-  // Enable dynamic CORS matching incoming origin (supports Vercel, custom domain, localhost)
+  // Dynamic CORS: Allows origins defined in FRONTEND_URL or dynamically matches incoming origin (Vercel, localhost, etc.)
+  const allowedOrigins = process.env.FRONTEND_URL
+    ? [process.env.FRONTEND_URL, 'https://mini-sales.vercel.app', 'http://localhost:5173']
+    : true;
+
   app.enableCors({
-    origin: true,
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     credentials: true,
