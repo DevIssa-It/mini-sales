@@ -9,10 +9,22 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/minipos?schema=public';
-    const pool = new Pool({ connectionString });
-    const adapter = new PrismaPg(pool);
+    const connectionString =
+      process.env.DATABASE_URL ||
+      process.env.DATABASE_PUBLIC_URL ||
+      'postgresql://postgres:postgres@localhost:5432/minipos?schema=public';
 
+    const isProduction =
+      process.env.NODE_ENV === 'production' ||
+      connectionString.includes('railway') ||
+      connectionString.includes('.rlwy.net');
+
+    const pool = new Pool({
+      connectionString,
+      ssl: isProduction ? { rejectUnauthorized: false } : false,
+    });
+
+    const adapter = new PrismaPg(pool);
     super({ adapter });
   }
 
