@@ -22,13 +22,13 @@ const products: (Prisma.ProductCreateInput & { imageUrl?: string; category?: str
 ];
 
 async function main() {
-  console.log('🌱 Seeding database with categories...');
+  const existingCount = await prisma.product.count();
+  if (existingCount > 0) {
+    console.log(`ℹ️ Database already has ${existingCount} products. Skipping initial seed.`);
+    return;
+  }
 
-  // Clear existing data
-  await prisma.transactionItem.deleteMany();
-  await prisma.transaction.deleteMany();
-  await prisma.product.deleteMany();
-
+  console.log('🌱 Database is empty. Seeding initial products...');
   for (const product of products) {
     await prisma.product.create({ data: product });
   }
