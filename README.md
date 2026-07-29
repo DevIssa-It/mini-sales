@@ -91,11 +91,13 @@ POST   /api/transactions/checkout Checkout
 GET    /api/transactions/:id      Detail transaksi
 ```
 
-## Deployment
+## Deployment & Repository Links
 
-- **Frontend**: [Link Vercel]
-- **Backend**: [Link Railway]
+- **Frontend App**: [https://mini-sales.vercel.app](https://mini-sales.vercel.app)
+- **Backend API**: [https://mini-sales-production.up.railway.app/api](https://mini-sales-production.up.railway.app/api)
+- **GitHub Repository**: [https://github.com/DevIssa-It/mini-sales](https://github.com/DevIssa-It/mini-sales)
 
 ## Author
 
-Ahmad — Xolvon Web Developer Technical Test 2026
+Ahmad — Xolvon Web Developer Technical Test (Juli 2026)
+
