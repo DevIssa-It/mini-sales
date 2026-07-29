@@ -1,10 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
+
+  // Register Global Exception Filter for guaranteed error CORS & logging
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -18,11 +22,12 @@ async function bootstrap() {
     }),
   );
 
-  // Global CORS setup (Sama seperti Express app.use(cors({ origin: '*' })))
+  // Enable dynamic CORS matching incoming origin (supports Vercel, custom domain, localhost)
   app.enableCors({
-    origin: '*',
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true,
   });
 
   // Global prefix

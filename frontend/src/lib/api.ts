@@ -5,18 +5,27 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Standardize error messages
+// Standardize error messages with clear network/gateway error detection
 api.interceptors.response.use(
   (res) => res,
   (error) => {
-    const message =
-      error.response?.data?.message ||
-      (Array.isArray(error.response?.data?.message)
-        ? error.response.data.message[0]
-        : null) ||
-      error.message ||
-      'Terjadi kesalahan';
-    return Promise.reject(new Error(Array.isArray(message) ? message[0] : message));
+    let message: string;
+
+    if (!error.response) {
+      // Network error or CORS / Gateway failure (502 / Offline)
+      message =
+        'Gagal terhubung ke server API (CORS / Network Error / Backend offline). Harap periksa status server backend di Railway.';
+    } else if (error.response.status === 502) {
+      message =
+        'Server Backend (Railway) mengalami 502 Bad Gateway. Harap periksa koneksi database di Railway.';
+    } else {
+      const serverMsg = error.response.data?.message;
+      message = Array.isArray(serverMsg)
+        ? serverMsg[0]
+        : serverMsg || error.message || 'Terjadi kesalahan pada server';
+    }
+
+    return Promise.reject(new Error(message));
   },
 );
 
