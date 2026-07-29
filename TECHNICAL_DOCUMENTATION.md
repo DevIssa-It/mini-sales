@@ -106,16 +106,20 @@ Automated Unit Testing dilakukan pada Backend menggunakan Jest ([`test/products.
 Sesuai ketentuan transparansi penggunaan AI dalam brief:
 
 * **Tools AI yang Digunakan**: Antigravity AI Pair Programmer (DeepMind Advanced Coding Agent).
+* **Peran Pengembang (Human Developer / Technical Lead)**:
+  1. **Architectural Governance & Design System**: Merancang struktur arsitektur proyek, mendefinisikan aturan `AGENTS.md`, serta sistem token warna HubSpot di `design.md`.
+  2. **Code Review, Debugging & Quality Control**: Memeriksa seluruh baris kode, melakukan refactoring menjadi komponen modular (DRY), men-debug validasi input harga, serta memverifikasi kelulusan 12 unit test Jest dan TypeScript compilation.
+  3. **UX & Feature Specification**: Menentukan spesifikasi UX kasir (modal dialog kuantitas `AddToCartModal`, layout responsif 1600px, tombol cetak struk thermal `@media print`, filter kategori produk, dan dashboard analitik omset).
 * **Bagian Pekerjaan yang Dibantu AI**:
-  1. Scaffolding awal struktur modul NestJS & Vite React.
+  1. Scaffolding boilerplate modul NestJS & Vite React.
   2. Pembuatan file mock data seeder ([`prisma/seed.ts`](file:///C:/Users/ahmad/Documents/Project/mini-pos/backend/prisma/seed.ts)).
   3. Pembuatan unit tests di Jest.
 * **Cara Output AI Diperiksa & Divalidasi**:
   1. Setiap kompilasi TypeScript divalidasi via `npx tsc --noEmit`.
   2. Pengujian otomatis dijalankan via `npm test`.
-  3. Kode diperiksa terhadap kepatuhan prinsip DRY, SOLID, dan tidak ada hardcoded credentials.
-* **Perubahan yang Dilakukan Terhadap Output AI**:
-  1. Melakukan refactoring modul UI menjadi komponen atomic (`QuantitySelector`, `PageContainer`, `CartItemRow`, `CartSummaryCard`).
+  3. Kode diperiksa terhadap kepatuhan prinsip DRY, SOLID, dan keamanan transaksi server-side.
+* **Perubahan & Refactoring yang Dilakukan**:
+  1. Melakukan refactoring modul UI menjadi komponen atomic (`QuantitySelector`, `PageContainer`, `CartItemRow`, `CartSummaryCard`, `AddToCartModal`).
   2. Menyesuaikan konfigurasi Prisma ORM v7 (`prisma.config.ts` & `@prisma/adapter-pg`).
 
 ---
