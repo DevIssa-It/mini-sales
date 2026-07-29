@@ -50,9 +50,12 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('api');
 
-  const port = process.env.PORT || 3000;
+  const port = Number(process.env.PORT) || 3000;
   await app.listen(port, '0.0.0.0');
-  logger.log(`🚀 Application running on: http://0.0.0.0:${port}/api`);
+  logger.log(`🚀 Application running on port ${port}: http://0.0.0.0:${port}/api`);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('❌ Failed to start NestJS server:', err);
+  process.exit(1);
+});
