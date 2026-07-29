@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Storefront, ShoppingCart, ClockCounterClockwise, Package } from '@phosphor-icons/react';
 import { useCartStore } from '../../store/cartStore';

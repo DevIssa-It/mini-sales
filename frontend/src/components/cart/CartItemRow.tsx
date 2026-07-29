@@ -1,4 +1,3 @@
-import React from 'react';
 import { Trash } from '@phosphor-icons/react';
 import { formatCurrency } from '../../lib/utils';
 import { QuantitySelector } from '../ui/QuantitySelector';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Plus, Minus } from '@phosphor-icons/react';
 
 interface QuantitySelectorProps {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowRight } from '@phosphor-icons/react';
 import { formatCurrency } from '../../lib/utils';
 import type { CartItem } from '../../types';

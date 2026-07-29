@@ -1,4 +1,3 @@
-import React from 'react';
 import { Warning } from '@phosphor-icons/react';
 
 interface ConfirmDialogProps {

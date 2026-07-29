@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShoppingCartSimple, PencilSimple, Eye, EyeSlash } from '@phosphor-icons/react';
 import { formatCurrency } from '../../lib/utils';
 import { AddToCartModal } from '../cart/AddToCartModal';

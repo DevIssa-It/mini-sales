@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TransactionReceipt } from '../transactions/TransactionReceipt';
 import type { Transaction } from '../../types';

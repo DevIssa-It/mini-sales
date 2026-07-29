@@ -1,4 +1,3 @@
-import React from 'react';
 import { Printer } from '@phosphor-icons/react';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { Transaction } from '../../types';
