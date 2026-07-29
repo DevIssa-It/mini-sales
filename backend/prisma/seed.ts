@@ -7,14 +7,19 @@ const connectionString =
   process.env.DATABASE_PUBLIC_URL ||
   'postgresql://postgres:postgres@localhost:5432/minipos?schema=public';
 
-const isProduction =
-  process.env.NODE_ENV === 'production' ||
-  connectionString.includes('railway') ||
-  connectionString.includes('.rlwy.net');
+const isExplicitSslDisable = connectionString.includes('sslmode=disable');
+const isInternalRailway = connectionString.includes('railway.internal');
+const isLocalhost = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
+
+const needsSsl =
+  !isExplicitSslDisable &&
+  !isInternalRailway &&
+  !isLocalhost &&
+  (connectionString.includes('.rlwy.net') || process.env.DATABASE_SSL === 'true');
 
 const pool = new Pool({
   connectionString,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
+  ssl: needsSsl ? { rejectUnauthorized: false } : false,
 });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
@@ -50,8 +55,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    console.error('❌ Error during seeding:', e);
   })
   .finally(async () => {
     await prisma.$disconnect();
