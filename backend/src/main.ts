@@ -18,20 +18,20 @@ async function bootstrap() {
     }),
   );
 
-  // Flexible CORS configuration for Vercel, localhost, and custom FRONTEND_URL
+  // CORS configuration reading FRONTEND_URL dynamically with safe defaults
+  const extraOrigin = process.env.FRONTEND_URL;
   const allowedOrigins = [
-    process.env.FRONTEND_URL,
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://mini-sales.vercel.app',
-  ].filter((url): url is string => Boolean(url));
+    ...(extraOrigin ? [extraOrigin] : []),
+  ];
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, Postman, curl)
+      // Allow requests with no origin (e.g. mobile apps, Postman, curl, server-to-server)
       if (!origin) return callback(null, true);
-      
-      // Allow exact match or any *.vercel.app domain
+
+      // Allow if origin is explicitly in allowed list or is any *.vercel.app domain
       if (
         allowedOrigins.includes(origin) ||
         origin.endsWith('.vercel.app') ||
@@ -40,7 +40,6 @@ async function bootstrap() {
         return callback(null, true);
       }
 
-      // Allow request
       return callback(null, true);
     },
     credentials: true,
