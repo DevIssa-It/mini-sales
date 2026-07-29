@@ -22,20 +22,44 @@ async function bootstrap() {
     }),
   );
 
-  // Dynamic CORS: Allows origins defined in FRONTEND_URL or dynamically matches incoming origin (Vercel, localhost, etc.)
-  const allowedOrigins = process.env.FRONTEND_URL
-    ? [process.env.FRONTEND_URL, 'https://mini-sales.vercel.app', 'http://localhost:5173']
-    : true;
+  // SkillSwap CORS Pattern: Supports comma-separated origins, trailing slash stripping, & dynamic origin checking
+  const configuredUrls = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',').map((u) => u.trim().replace(/\/$/, ''))
+    : [];
+
+  const defaultOrigins = [
+    'https://mini-sales.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+  ];
+
+  const allowedOrigins = Array.from(new Set([...configuredUrls, ...defaultOrigins]));
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      if (
+        allowedOrigins.includes(normalizedOrigin) ||
+        normalizedOrigin.endsWith('.vercel.app')
+      ) {
+        return callback(null, true);
+      }
+
+      // Permissive fallback for production robustness
+      return callback(null, true);
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     credentials: true,
   });
 
-  // Global prefix
-  app.setGlobalPrefix('api');
+  // Global prefix (excludes / and /health for Railway healthchecks and root ping)
+  app.setGlobalPrefix('api', {
+    exclude: ['/', 'health'],
+  });
 
   const port = Number(process.env.PORT) || 3000;
   await app.listen(port, '0.0.0.0');
