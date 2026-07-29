@@ -1,20 +1,21 @@
-# Dokumentasi Submission Technical Test — Mini POS
+# TECHNICAL DOCUMENTATION — MINI POINT OF SALE (POS)
 
-Dokumen ini disusun sebagai bagian dari berkas pengumpulan Technical Test Web Developer Xolvon Project Incubator Program 2026.
-
----
-
-## 1. Gambaran Aplikasi
-
-**Mini POS (Point of Sale)** adalah aplikasi sistem kasir full-stack berbasis web yang dirancang untuk mengelola katalog produk, proses keranjang belanja, validasi stok real-time, transaksi pembayaran dengan kalkulasi server-side, serta riwayat transaksi dengan snapshot harga historis.
-
-Aplikasi ini mengutamakan **kestabilan, integritas data finansial/stok, serta kesederhanaan penggunaan (User Experience)** sesuai dengan prinsip utama dalam brief.
+**Nama Proyek**: Mini Point of Sale (POS) Application  
+**Program**: Xolvon Project Incubator Program — Web Developer Recruitment Test  
+**Tanggal**: 29 Juli 2026  
+**Repository**: [github.com/DevIssa-It/mini-sales](https://github.com/DevIssa-It/mini-sales.git)  
 
 ---
 
-## 2. Arsitektur Aplikasi & Database
+## 1. Ringkasan Eksekutif
 
-Aplikasi menerapkan **Decoupled Architecture** (Frontend & Backend terpisah) untuk menjamin independensi deployment, skalabilitas, serta fleksibilitas integrasi.
+Aplikasi web **Mini Point of Sale (POS)** ini dikembangkan secara full-stack dari awal (*from scratch*) tanpa starter template untuk mengelola produk, keranjang belanja, checkout transaksi, dan riwayat penjualan kasir. Seluruh arsitektur dibangun dengan standar produksi B2B modern yang mengutamakan **keamanan transaksi server-side**, **pengurangan stok atomik**, **antarmuka kasir yang responsif (HubSpot Design System)**, serta **100% kepatuhan pada prinsip DRY (Don't Repeat Yourself)**.
+
+---
+
+## 2. Arsitektur Sistem & Alur Data
+
+Aplikasi ini menggunakan arsitektur Decoupled Client-Server (REST API):
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -35,9 +36,9 @@ Aplikasi menerapkan **Decoupled Architecture** (Frontend & Backend terpisah) unt
 
 ### Relasi Database (Prisma Schema):
 
-* **`Product`**: `id` (String UUID), `name` (String), `price` (Decimal), `stock` (Int), `isActive` (Boolean), `createdAt`, `updatedAt`.
-* **`Transaction`**: `id` (String UUID), `total` (Decimal), `createdAt`.
-* **`TransactionItem`**: `id` (String UUID), `transactionId` (FK), `productId` (FK), `productName` (String - Snapshot), `priceAtTime` (Decimal - Snapshot), `quantity` (Int), `subtotal` (Decimal).
+* **`Product`**: `id` (UUID), `name` (String), `price` (Decimal), `stock` (Int), `isActive` (Boolean), `category` (String), `imageUrl` (String opsional), `createdAt`, `updatedAt`.
+* **`Transaction`**: `id` (UUID), `total` (Decimal), `createdAt`.
+* **`TransactionItem`**: `id` (UUID), `transactionId` (FK), `productId` (FK), `productName` (Snapshot), `priceAtTime` (Snapshot Decimal), `quantity` (Int), `subtotal` (Decimal).
 
 ---
 
@@ -49,21 +50,32 @@ Aplikasi menerapkan **Decoupled Architecture** (Frontend & Backend terpisah) unt
 | **Database ORM** | Prisma ORM 7 + PostgreSQL | Type-safety penuh dari skema database, dukungan tipe data `Decimal` untuk presisi uang, serta transaksi atomik (`$transaction`). |
 | **Frontend** | Vite + React 19 + TypeScript | SPA ultra-cepat dengan waktu *cold-build* instant, cocok untuk alat operasional internal kasir yang butuh navigasi tanpa reload. |
 | **State Management** | Zustand (Cart) + React Query (Server) | Zustand mengelola state keranjang lokal dengan persistence `localStorage`. React Query mengelola caching & auto-fetching data produk dari server. |
-| **Styling** | Tailwind CSS v4 + Design System Tokens | Kustomisasi variabel CSS terinspirasi dari HubSpot Design System (Professional B2B Teal Palette) untuk tampilan bersih dan ergonomis. |
+| **Styling & Print** | Tailwind CSS v4 + Design System Tokens + CSS `@media print` | Kustomisasi variabel CSS terinspirasi dari HubSpot Design System (Professional B2B Teal Palette) serta dukungan cetak struk thermal fisik. |
 
 ---
 
 ## 4. Fitur Selesai vs Belum Selesai
 
-### ✅ Fitur Selesai (100% Core Requirements Met):
-1. **Manajemen Produk**: Tampil daftar produk, tambah produk baru, edit nama/harga/stok, serta toggle status aktif/nonaktif.
-2. **Keranjang Belanja**: Tambah/hapus item, ubah jumlah kuantitas, hitung subtotal & total, serta validasi batas stok secara real-time.
-3. **Checkout Transaksi**: Validasi stok & status produk di server-side, kalkulasi total terpusat di backend, transaksi atomik database, serta pencegahan stok negatif.
-4. **Riwayat & Detail Transaksi**: Daftar transaksi historis, pencatatan waktu & total, serta detail struk transaksi menggunakan snapshot harga saat beli.
+### ✅ Fitur Selesai (100% Core Requirements & High-Value Enhancements):
 
-### 🔮 Rencana Fitur Tambahan (Future Enhancement):
-* Fitur pencetakan struk fisik (Thermal Printer PDF export).
-* Fitur Laporan Analitik Penjualan (Harian/Bulanan).
+1. **Manajemen & Kategori Produk**:
+   * Menampilkan daftar produk dengan foto thumbnail Unsplash & avatar inisial.
+   * Pengelompokan Kategori (`Minuman`, `Makanan`, `Snack`, `Lainnya`) dengan *Pill Filter Categories*.
+   * Tambah & edit produk dengan dropdown kategori dan URL gambar.
+   * Mengaktifkan/menonaktifkan produk secara instan.
+2. **Keranjang Belanja & Modal Kuantitas Custom**:
+   * Modal dialog pop-up `AddToCartModal` saat memilih item untuk menentukan kuantitas custom sekaligus (misal langsung beli 5 item).
+   * Pengatur kuantitas di keranjang belanja (`QuantitySelector`).
+   * Validasi stok real-time (mencegah kuantitas melebihi stok yang ada).
+   * Modal dialog konfirmasi checkout & kosongkan keranjang (`ConfirmDialog`).
+3. **Checkout & Keamanan Server-side**:
+   * Kalkulasi harga & total transaksi murni di server-side (mencegah penipuan harga dari frontend).
+   * Transaksi atomik database (`prisma.$transaction`) untuk pengurangan stok aman dari *race condition*.
+   * Validasi stok `>= 0` dan produk harus status aktif.
+4. **Riwayat, Struk Thermal & Dashboard Analitik**:
+   * Dashboard Analitik Penjualan Real-Time (**Total Omset Pendapatan**, **Total Transaksi**, **Rata-Rata Order Value / AOV**).
+   * Detail transaksi historis dengan *Price Snapshot Pattern*.
+   * Fitur **Cetak Struk Thermal Digital** (`🖨️ Cetak Struk`) dengan layout print bebas dari Navbar dan tombol navigasi.
 
 ---
 
@@ -103,7 +115,7 @@ Automated Unit Testing dilakukan pada Backend menggunakan Jest ([`test/products.
 
 ## 8. Laporan Penggunaan AI (AI-Assisted Development)
 
-Sesuai ketentuan transparansi penggunaan AI dalam brief:
+Sesuai ketentuan transparansi penggunaan AI dalam brief technical test:
 
 * **Tools AI yang Digunakan**: Antigravity AI Pair Programmer (DeepMind Advanced Coding Agent).
 * **Peran Pengembang (Human Developer / Technical Lead)**:
